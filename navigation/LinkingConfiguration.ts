@@ -27,6 +27,8 @@ const linking: LinkingOptions<RootStackParamList> = {
           },
         },
       },
+      DrugStore:'drugstore',
+      DrugStoreDetail:'drugstoredetail',
       Modal: 'modal',
       NotFound: '*',
     },
