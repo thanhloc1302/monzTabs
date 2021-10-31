@@ -15,9 +15,9 @@ const linking: LinkingOptions<RootStackParamList> = {
     screens: {
       Root: {
         screens: {
-          TabOne: {
+          Home: {
             screens: {
-              TabOneScreen: 'one',
+              TabOneScreen: 'home',
             },
           },
           TabTwo: {
@@ -29,6 +29,16 @@ const linking: LinkingOptions<RootStackParamList> = {
       },
       DrugStore:'drugstore',
       DrugStoreDetail:'drugstoredetail',
+      RegPhone:'regphone',
+      RegPhoneOTP:'regphoneotp',
+      RegInfo:'reginfo',
+      RegSuccess:'regsuccess',
+      LoginChoise: 'loginchoise',
+      LoginForm: 'loginform',
+      Remind:'remind',
+      RemindWater:'remindwater',
+      RemindDrug:'reminddrug',
+      RemindDrugDetail:'reminddrugdetail',
       Modal: 'modal',
       NotFound: '*',
     },

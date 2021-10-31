@@ -13,7 +13,7 @@ import {
 import Carousel from "react-native-anchor-carousel";
 import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
-
+import { useNavigation } from "@react-navigation/native";
 const { width: windowWidth } = Dimensions.get("window");
 const ITEM_WIDTH = windowWidth / 2.3;
 const SEPARATOR_WIDTH = 0;
@@ -34,7 +34,7 @@ export default function LocationSlide(props) {
   const [locationTouchID, setLocationTouchID] = useState(0);
   //console.log(props.data_list);
   const carouselRef = useRef(null);
-
+  const navigation = useNavigation();
   function goToLocationDetail(location_id, location_type_id) {
     //  Alert.alert(location_id + `,` + location_type_id);
   }
@@ -69,7 +69,15 @@ export default function LocationSlide(props) {
               setLocationTouch(false);
               setLocationTouchID(0);
             }}
-            onPress={() => goToLocationDetail(id, location_type_id)}
+            onPress={() => {
+              // goToLocationDetail(id, location_type_id)
+              console.log(location_type_id);
+              if (location_type_id == 1) {
+                navigation.navigate("DrugStoreDetail", {
+                  location_id: id,
+                });
+              }
+            }}
             style={{
               width: "90%",
               padding: 7,

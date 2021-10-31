@@ -5,7 +5,7 @@ const ITEM_WIDTH = 0.7 * windowWidth;
 const SEPARATOR_WIDTH = 10;
 export default StyleSheet.create({
   container: {
-    backgroundColor: "red",
+    backgroundColor: "#FFF",
   },
 
   colorRed: {
@@ -65,5 +65,12 @@ export default StyleSheet.create({
     fontSize: 24,
     fontWeight: "bold",
     color: "#00AEEF",
+  },
+  userName: {
+    color: "#00AEEF",
+    fontWeight: "700",
+  },
+  helloText: {
+    color: "rgba(0, 24, 32, 0.5)",
   },
 });

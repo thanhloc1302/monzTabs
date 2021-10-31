@@ -19,6 +19,16 @@ export type RootStackParamList = {
   NotFound: undefined;
   DrugStore:undefined;
   DrugStoreDetail:undefined;
+  RegPhone:undefined;
+  RegPhoneOTP:undefined;
+  RegInfo:undefined;
+  RegSuccess:undefined;
+  LoginChoise: undefined;
+  LoginForm: undefined;
+  Remind:undefined;
+  RemindWater: undefined;
+  RemindDrug:undefined;
+  RemindDrugDetail: undefined;
 };
 
 export type RootStackScreenProps<Screen extends keyof RootStackParamList> = NativeStackScreenProps<
@@ -29,8 +39,19 @@ export type RootStackScreenProps<Screen extends keyof RootStackParamList> = Nati
 export type RootTabParamList = {
   DrugStore:undefined;
   DrugStoreDetail:undefined;
+  RegPhone:undefined;
+  RegPhoneOTP:undefined;
+  RegInfo:undefined;
+  RegSuccess:undefined;
+  Home:undefined;
   TabOne: undefined;
   TabTwo: undefined;
+  LoginChoise: undefined;
+  LoginForm: undefined;
+  Remind:undefined;
+  RemindWater: undefined;
+  RemindDrug:undefined;
+  RemindDrugDetail: undefined;
 };
 
 export type RootTabScreenProps<Screen extends keyof RootTabParamList> = CompositeScreenProps<

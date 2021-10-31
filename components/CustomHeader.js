@@ -24,7 +24,9 @@ const CustomHeader = ({ title }) => {
         onPress={() => navigation.goBack()}
       />
       <Text>{"  "}</Text>
-      <Text style={styles.headerTitle}>{title}</Text>
+      <Text style={styles.headerTitle}>
+        {title ? title.charAt(0).toUpperCase() + title.slice(1) : ""}
+      </Text>
     </View>
   );
 };

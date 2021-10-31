@@ -4,10 +4,10 @@ import {
   View,
   Image,
   TouchableOpacity,
-  Dimensions,
   SafeAreaView,
   ScrollView,
 } from "react-native";
+import { useIsFocused } from "@react-navigation/native";
 import { LinearGradient } from "expo-linear-gradient";
 import { Entypo } from "@expo/vector-icons";
 import { FontAwesome } from "@expo/vector-icons";
@@ -30,7 +30,35 @@ let vn_rank;
 
 let covid;
 
-const HomeHeader = () => {
+const HomeHeader = ({ user_info }) => {
+  let isLogedIn = <View></View>;
+  if (user_info) {
+    isLogedIn = (
+      <View
+        style={{ flexDirection: "row", alignItems: "center", marginLeft: 10 }}
+      >
+        <FontAwesome name="user-circle" size={32} color="#00AEEF" />
+        <View style={{ marginLeft: 10 }}>
+          <Text style={styles.helloText}>Xin chào !</Text>
+          <Text style={styles.userName}>{user_info.name}</Text>
+        </View>
+      </View>
+    );
+  } else {
+    isLogedIn = (
+      <Image
+        style={{
+          marginLeft: 5,
+          width: 95,
+          height: null,
+          resizeMode: "cover",
+          aspectRatio: 95 / 27,
+        }}
+        source={require("../../assets/logo_light.png")}
+      />
+    );
+  }
+
   return (
     <View
       style={{
@@ -47,17 +75,8 @@ const HomeHeader = () => {
           alignItems: "center",
         }}
       >
-        <Entypo name="menu" size={40} color="#00AEEF" />
-        <Image
-          style={{
-            marginLeft: 5,
-            width: 95,
-            height: null,
-            resizeMode: "cover",
-            aspectRatio: 95 / 27,
-          }}
-          source={require("../../assets/logo_light.png")}
-        />
+        <Entypo name="menu" size={43} color="#00AEEF" />
+        {isLogedIn}
       </View>
       <View style={{ marginRight: 10 }}>
         <FontAwesome name="search" size={30} color="#00AEEF" />
@@ -72,7 +91,15 @@ const IconMenu = () => {
     <View style={styles.listIconContainer}>
       <View style={styles.iconRow}>
         <View style={styles.iconCol}>
-          <TouchableOpacity activeOpacity={0.5} style={styles.iconContainer}>
+          <TouchableOpacity
+            activeOpacity={0.5}
+            style={styles.iconContainer}
+            onPress={() =>
+              navigation.navigate("DrugStore", {
+                location_type_id: 3,
+              })
+            }
+          >
             <LinearGradient
               colors={["#FFFFFF", "rgba(231, 248, 255, 0.87)", "#42CCFF"]}
               style={styles.colorBG}
@@ -89,7 +116,11 @@ const IconMenu = () => {
           <TouchableOpacity
             activeOpacity={0.5}
             style={styles.iconContainer}
-            onPress={() => navigation.navigate("DrugStore")}
+            onPress={() =>
+              navigation.navigate("DrugStore", {
+                location_type_id: 1,
+              })
+            }
           >
             <LinearGradient
               colors={["#FFFFFF", "rgba(231, 248, 255, 0.87)", "#42CCFF"]}
@@ -134,7 +165,11 @@ const IconMenu = () => {
           </TouchableOpacity>
         </View>
         <View style={styles.iconCol}>
-          <TouchableOpacity activeOpacity={0.5} style={styles.iconContainer}>
+          <TouchableOpacity
+            activeOpacity={0.5}
+            style={styles.iconContainer}
+            onPress={() => navigation.navigate("Remind")}
+          >
             <LinearGradient
               colors={["#FFFFFF", "rgba(231, 248, 255, 0.87)", "#42CCFF"]}
               style={styles.colorBG}
@@ -166,14 +201,15 @@ const IconMenu = () => {
   );
 };
 
-const getDrugStore = () => {};
-
 const HomeScreen = () => {
+  const revisited = useIsFocused();
   //lấy thông tin nhà thuốc quanh đây
   const [location, setLocation] = useState(null);
   const [errorMsg, setErrorMsg] = useState(null);
   const [list_drug_store, setListDrugStore] = useState(null);
   const [covid_list_news, setCovid_list_news] = useState([]);
+  const [user_info, setUserInfo] = useState(null);
+
   useEffect(() => {
     (async () => {
       let { status } = await Location.requestForegroundPermissionsAsync();
@@ -192,33 +228,45 @@ const HomeScreen = () => {
             setListDrugStore(val["location"]);
           });
       }
-
-      //lấy thông tin covid
-
-      monzApi.get_covid().then((val) => {
-        covid_vn = val["vietnam"];
-        covid_vn_dt = val["vietnam_detail"];
-        for (var i = 0; i < covid_vn_dt.length; i++) {
-          if (Number.isFinite(Number(covid_vn_dt[i].today))) {
-            vn_total_today = vn_total_today + Number(covid_vn_dt[i].today);
-          }
-        }
-        covid_w = val["world"];
-        covid_w_dt = val["world_detail"];
-
-        for (var i = 0; i < val["news"].length; i++) {
-          val["news"][i]["id"] = "item" + i;
-        }
-        setCovid_list_news(val["news"]);
-        vn_total_27_4 = covid_vn["total"].replace(".", "") - 3053;
-      });
     })();
   }, []);
 
+  useEffect(() => {
+    //lấy thông tin covid
+
+    monzApi.get_covid().then((val) => {
+      covid_vn = val["vietnam"];
+      covid_vn_dt = val["vietnam_detail"];
+      for (var i = 0; i < covid_vn_dt.length; i++) {
+        if (Number.isFinite(Number(covid_vn_dt[i].today))) {
+          vn_total_today = vn_total_today + Number(covid_vn_dt[i].today);
+        }
+      }
+      covid_w = val["world"];
+      covid_w_dt = val["world_detail"];
+
+      for (var i = 0; i < val["news"].length; i++) {
+        val["news"][i]["id"] = "item" + i;
+      }
+      setCovid_list_news(val["news"]);
+      vn_total_27_4 = covid_vn["total"].replace(".", "") - 3053;
+    });
+  }, []);
+
+  useEffect(() => {
+    // Call only when screen open or when back on screen
+    if (revisited) {
+      monzApi.get_user_info_logedin().then((result) => {
+        setUserInfo(result);
+        console.log(result);
+      });
+    }
+  }, [revisited]);
+
   return (
-    <SafeAreaView>
+    <SafeAreaView style={styles.container}>
       <ScrollView>
-        <HomeHeader></HomeHeader>
+        <HomeHeader user_info={user_info}></HomeHeader>
         {/* slide */}
         <NewsSlide data_list={covid_list_news}></NewsSlide>
         <View>

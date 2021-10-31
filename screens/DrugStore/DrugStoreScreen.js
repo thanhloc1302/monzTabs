@@ -6,6 +6,7 @@ import {
   ActivityIndicator,
   Image,
   TouchableOpacity,
+  TextInput,
   TouchableWithoutFeedback,
   Animated,
   Dimensions,
@@ -13,11 +14,18 @@ import {
   ScrollView,
   KeyboardAvoidingView,
 } from "react-native";
+import Constants from "expo-constants";
 import MapView, { Marker } from "react-native-maps";
 import * as Location from "expo-location";
 import { TabView, SceneMap } from "react-native-tab-view";
+import { Ionicons } from "@expo/vector-icons";
 import { Entypo } from "@expo/vector-icons";
+import { FontAwesome } from "@expo/vector-icons";
+
+import { useRoute } from "@react-navigation/native";
 import { useNavigation } from "@react-navigation/native";
+import Collapsible from "react-native-collapsible";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 
 import monzApi from "../../api/MonzApi";
 import CustomHeader from "../../components/CustomHeader";
@@ -44,7 +52,11 @@ const TabsScreen = ({ listDrugStore }) => {
         <TouchableOpacity
           key={idx}
           style={styles.listDrugStoreRow}
-          onPress={() => navigation.navigate("DrugStoreDetail")}
+          onPress={() =>
+            navigation.navigate("DrugStoreDetail", {
+              location_id: loca.id,
+            })
+          }
         >
           <Image
             source={{ url: loca.image }}
@@ -135,7 +147,7 @@ const TabsDrugStore = (cusData) => {
   const [routes] = React.useState([
     { key: "near", title: "Gần nhất" },
     { key: "good", title: "Đánh giá tốt" },
-    { key: "trust", title: "Bệnh viện uy tín" },
+    { key: "trust", title: "Uy tín" },
   ]);
 
   const renderScene = ({ route }) => {
@@ -199,6 +211,19 @@ const TabsDrugStore = (cusData) => {
 };
 
 const DrugStoreScreen = () => {
+  const route = useRoute();
+  const { location_type_id } = route.params;
+  const [locationTypeName, setLocationTypeName] = useState("");
+  const [searchInputOffsetTop, setSearchInputOffsetTop] = useState(0);
+  const [isSearching, setIsSearching] = useState(false);
+
+  useEffect(() => {
+    monzApi.get_location_type_name(location_type_id).then((val) => {
+      console.log(val);
+      setLocationTypeName(val.name);
+    });
+  }, []);
+
   const [mapRegion, setmapRegion] = useState({
     latitude: 21.0215979,
     longitude: 105.8324147,
@@ -207,10 +232,11 @@ const DrugStoreScreen = () => {
   });
 
   // const [location, setLocation] = useState(null);
-  const [errorMsg, setErrorMsg] = useState(null);
+
   const [list_drug_store, setListDrugStore] = useState(null);
   const [isLoading, setLoading] = useState(true);
-  const [isShow, setIsShow] = useState(false);
+
+  const [collapsed, setToggleExpanded] = useState(true);
 
   useEffect(() => {
     (async () => {
@@ -231,17 +257,65 @@ const DrugStoreScreen = () => {
       });
       if (location != null) {
         monzApi
-          .get_location(location.latitude, location.longitude, 1)
+          .get_location(location.latitude, location.longitude, location_type_id)
           .then((val) => {
-            //   console.log(val["location"]);
             setListDrugStore(val["location"]);
             setLoading(false);
           });
       }
-
-      console.log("1234566");
     })();
   }, []);
+
+  const [searchBgHeight, setSearchBgHeight] = useState(0);
+  const searchBgOpacity = useState(new Animated.Value(0))[0];
+
+  const searchInputTopAnitated = useState(
+    new Animated.Value(59 + Constants.statusBarHeight)
+  )[0];
+
+  const searchInputBgShow = () => {
+    setSearchBgHeight(Dimensions.get("window").height);
+    setIsSearching(true);
+    Animated.timing(searchBgOpacity, {
+      toValue: 1,
+      duration: 500,
+      useNativeDriver: true,
+    }).start();
+
+    Animated.timing(searchInputTopAnitated, {
+      toValue: Constants.statusBarHeight,
+      duration: 500,
+      useNativeDriver: false,
+    }).start();
+  };
+
+  const searchInputBgHide = () => {
+    Animated.timing(searchBgOpacity, {
+      toValue: 0,
+      duration: 500,
+      useNativeDriver: true,
+    }).start(({ finished }) => {
+      setSearchBgHeight(0);
+    });
+
+    Animated.timing(searchInputTopAnitated, {
+      toValue: searchInputOffsetTop,
+      duration: 500,
+      useNativeDriver: false,
+    }).start();
+    setIsSearching(false);
+  };
+
+  let userSeaching;
+  if (isSearching) {
+    userSeaching = (
+      <TouchableWithoutFeedback onPress={() => searchInputBgHide()}>
+        <Ionicons name="arrow-back-outline" size={24} color="black" />
+      </TouchableWithoutFeedback>
+    );
+  } else {
+    userSeaching = <FontAwesome name="search" size={18} color="#C5C5C5" />;
+  }
 
   let loadMap;
   if (isLoading) {
@@ -284,56 +358,132 @@ const DrugStoreScreen = () => {
       </MapView>
     );
   }
-
-  let isShowIcon;
-  if (isShow) {
-    isShowIcon = (
-      <TouchableWithoutFeedback
-        style={styles.isShowIconContainer}
-        onPress={() => setIsShow(false)}
-      >
-        <Entypo name="chevron-thin-down" size={20} color="white" />
-      </TouchableWithoutFeedback>
-    );
-  } else {
-    isShowIcon = (
-      <TouchableWithoutFeedback
-        style={styles.isShowIconContainer}
-        onPress={() => setIsShow(true)}
-      >
-        <Entypo
-          name="chevron-thin-up"
-          size={20}
-          color="white"
-          style={{ marginBottom: 10 }}
-        />
-      </TouchableWithoutFeedback>
-    );
-  }
-
+  const ref = useRef();
   return (
-    <View style={{ flex: 1 }}>
-      <CustomHeader title={"Nhà thuốc"}></CustomHeader>
-      {loadMap}
-      <View
-        style={[styles.drugStoreList, isShow ? { flex: 1.5 } : { flex: 0 }]}
-      >
-        <View
-          style={{
-            width: "100%",
-            alignItems: "center",
-            paddingTop: 5,
-          }}
-        >
-          {isShowIcon}
+    <KeyboardAwareScrollView contentContainerStyle={{ flex: 1 }}>
+      <CustomHeader title={locationTypeName}></CustomHeader>
+      <View style={{ flex: 1 }}>
+        {loadMap}
+        <View style={styles.drugStoreList}>
+          <TouchableOpacity
+            onPress={() => {
+              setToggleExpanded(!collapsed);
+            }}
+          >
+            <View
+              style={{
+                justifyContent: "center",
+                alignItems: "center",
+                paddingTop: 10,
+                paddingBottom: 10,
+              }}
+            >
+              <Text>
+                {collapsed ? (
+                  <Entypo name="chevron-thin-up" size={20} color="white" />
+                ) : (
+                  <Entypo name="chevron-thin-down" size={20} color="white" />
+                )}
+              </Text>
+            </View>
+          </TouchableOpacity>
+          <Collapsible collapsed={collapsed}>
+            <View
+              style={[
+                {
+                  height: Dimensions.get("window").height / 2,
+                },
+              ]}
+            >
+              <TabsDrugStore listDrugStore={list_drug_store}></TabsDrugStore>
+            </View>
+          </Collapsible>
         </View>
-        <TabsDrugStore listDrugStore={list_drug_store}></TabsDrugStore>
+
+        {/** nền và search input */}
+        <View style={styles.searchContainer}>
+          <View
+            style={[styles.searchBgBorder, { opacity: 0 }]}
+            ref={ref}
+            onLayout={(e) => {
+              ref.current.measureInWindow((x, y) => {
+                setSearchInputOffsetTop(y);
+              });
+            }}
+          ></View>
+        </View>
       </View>
-    </View>
+
+      <Animated.View
+        style={[
+          styles.inputSearchActionView,
+          {
+            height: searchBgHeight,
+            opacity: searchBgOpacity,
+          },
+        ]}
+      ></Animated.View>
+      <Animated.View
+        style={[
+          {
+            position: "absolute",
+            zIndex: 8999,
+            marginTop: searchInputTopAnitated,
+            alignSelf: "center",
+          },
+          styles.searchBgBorder,
+        ]}
+      >
+        {userSeaching}
+
+        <TextInput
+          placeholder={"Tìm kiếm " + locationTypeName + "..."}
+          keyboardType="default"
+          style={styles.searchInputText}
+          onFocus={searchInputBgShow}
+        />
+      </Animated.View>
+    </KeyboardAwareScrollView>
   );
 };
 
 const styles = StyleSheet.create({
+  inputSearchActionView: {
+    // height: Dimensions.get("window").height,
+    position: "absolute",
+    backgroundColor: "#FFF",
+    width: "100%",
+    zIndex: 10,
+    overflow: "hidden",
+  },
+
+  searchContainer: {
+    width: "100%",
+    paddingTop: 30,
+
+    position: "absolute",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  searchBgBorder: {
+    flexDirection: "row",
+    padding: 15,
+    width: "85%",
+    borderRadius: 20,
+    backgroundColor: "#fff",
+    shadowColor: "rgb(0, 22, 31);",
+    shadowOffset: {
+      width: -3,
+      height: 6,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 10,
+    elevation: 13,
+  },
+  searchInputText: {
+    flex: 1,
+    marginLeft: 10,
+  },
   containercarousel: {},
   //  drugStoreList
   drugStoreList: {

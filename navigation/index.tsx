@@ -23,6 +23,20 @@ import LinkingConfiguration from './LinkingConfiguration';
 import HomeScreen from '../screens/Home/Home';
 import DrugStoreScreen from '../screens/DrugStore/DrugStoreScreen';
 import DrugStoreDetailScreen from '../screens/DrugStoreDetail/DrugStoreDetailScreen'
+
+import RegPhoneScreen from '../screens/Register/RegPhone';
+import RegPhoneOTPScreen from '../screens/Register/RegPhoneOTP';
+import RegInfoScreen from '../screens/Register/RegInfo';
+import RegSuccessScreen from '../screens/Register/RegSuccess';
+
+import LoginChoiseScreen from '../screens/Login/LoginChose';
+import LoginFormScreen from '../screens/Login/LoginForm';
+
+import RemindScreen from '../screens/Remind/Remind';
+import RemindWaterScreen from '../screens/Remind/RemindWater';
+import RemindDrugScreen from '../screens/Remind/RemindDrug';
+import RemindDrugDetailScreen from '../screens/Remind/RemindDrugDetail';
+
 export default function Navigation({ colorScheme }: { colorScheme: ColorSchemeName }) {
   return (
     <NavigationContainer
@@ -47,6 +61,16 @@ function RootNavigator() {
       <Stack.Screen name="NotFound" component={NotFoundScreen} options={{ title: 'Oops!' }} />
       <Stack.Screen name="DrugStore" component={DrugStoreScreen} options={{ headerShown: false }} />
       <Stack.Screen name="DrugStoreDetail" component={DrugStoreDetailScreen} options={{ headerShown: false }} />
+      <Stack.Screen name="RegPhone" component={RegPhoneScreen} options={{ headerShown: false }} />
+      <Stack.Screen name="RegPhoneOTP" component={RegPhoneOTPScreen} options={{ headerShown: false }} />
+      <Stack.Screen name="RegInfo" component={RegInfoScreen} options={{ headerShown: false }} />
+      <Stack.Screen name="RegSuccess" component={RegSuccessScreen} options={{ headerShown: false }} />
+      <Stack.Screen name="LoginChoise" component={LoginChoiseScreen} options={{ headerShown: false }} />
+      <Stack.Screen name="LoginForm" component={LoginFormScreen} options={{ headerShown: false }} />
+      <Stack.Screen name="Remind" component={RemindScreen} options={{ headerShown: false }} />
+      <Stack.Screen name="RemindWater" component={RemindWaterScreen} options={{ headerShown: false }} />
+      <Stack.Screen name="RemindDrug" component={RemindDrugScreen} options={{ headerShown: false }} />
+      <Stack.Screen name="RemindDrugDetail" component={RemindDrugDetailScreen} options={{ headerShown: false }} />
       <Stack.Group screenOptions={{ presentation: 'modal' }}>
         <Stack.Screen name="Modal" component={ModalScreen} />
       </Stack.Group>
@@ -65,14 +89,14 @@ function BottomTabNavigator() {
 
   return (
     <BottomTab.Navigator
-      initialRouteName="TabOne"
+      initialRouteName="Home"
       screenOptions={{
       //  tabBarActiveTintColor: Colors[colorScheme].tint,
       }}>
       <BottomTab.Screen
-        name="TabOne"
+        name="Home"
         component={HomeScreen}
-        options={({ navigation }: RootTabScreenProps<'TabOne'>) => ({
+        options={({ navigation }: RootTabScreenProps<'Home'>) => ({
           title: 'Tab One',
           tabBarIcon: ({ color }) => <TabBarIcon name="code" color={color} />,
           headerShown: false,
@@ -95,7 +119,7 @@ function BottomTabNavigator() {
       
       <BottomTab.Screen
         name="TabTwo"
-        component={TabTwoScreen}
+        component={LoginChoiseScreen}
         options={{
           title: 'Tab Two',
           tabBarIcon: ({ color }) => <TabBarIcon name="code" color={color} />,
